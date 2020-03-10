@@ -1,0 +1,19 @@
+[Unit]
+Description=Secure connection between your computer and a DNS resolver
+Documentation=man:dnscrypt-proxy(8)
+# NTP always has local servers, and there's nothing to encrypt for time.
+# and ntp.service isn't native systemd service, if we start before it,
+# it will take a long time to sync. just save 20000+ms on boot.
+After=network.target ntp.service
+Before=nss-lookup.target
+
+[Service]
+Type=simple
+PIDFile=/var/run/dnscrypt-proxy-%i.pid
+ExecStart=/usr/sbin/dnscrypt-proxy -config /etc/dnscrypt-proxy/%I.toml -pidfile /var/run/dnscrypt-proxy-%i.pid
+# Automatically Restart
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+DefaultInstance=default
